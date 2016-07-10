@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	. "gopkg.in/check.v1"
 	"bufio"
+	. "gopkg.in/check.v1"
 )
 
 type WriterSuite struct{}

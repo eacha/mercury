@@ -10,7 +10,7 @@ const WAITING_TIMEOUT = 1
 type Writer struct {
 	file          *os.File
 	responseQueue chan string
-	finish         chan bool
+	finish        chan bool
 }
 
 func NewWriter(fileName string, responseQueue chan string, finish chan bool) (*Writer, error) {
@@ -41,14 +41,14 @@ func (wr *Writer) WriteJson() {
 
 	for {
 		select {
-		case line := <- wr.responseQueue:
+		case line := <-wr.responseQueue:
 			wr.file.WriteString(line + "\n")
-		case <- wr.finish:
+		case <-wr.finish:
 			for {
 				select {
-				case line := <- wr.responseQueue:
+				case line := <-wr.responseQueue:
 					wr.file.WriteString(line + "\n")
-				case <- time.After(time.Second * WAITING_TIMEOUT):
+				case <-time.After(time.Second * WAITING_TIMEOUT):
 					return
 				}
 			}
