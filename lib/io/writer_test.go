@@ -58,9 +58,36 @@ func (s *WriterSuite) TestWriteChannel(c *C) {
 
 	response <- "1234"
 
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 	finish <- true
 
+	response <- "4567"
+
+	time.Sleep(time.Second * 2)
+
+	file, err := os.Open(outputName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	reader := bufio.NewReader(file)
+
+	line, _, err := reader.ReadLine()
+	c.Assert(string(line), Equals, "1234")
+
+	line, _, err = reader.ReadLine()
+	c.Assert(string(line), Equals, "4567")
+}
+
+func (s *WriterSuite) TestWriteLastData(c *C) {
+	response := make(chan string, 1)
+	finish := make(chan bool, 1)
+	writer, _ := NewWriter(outputName, response, finish)
+	go writer.WriteJson()
+
+	finish <- true
+	response <- "1234"
 	response <- "4567"
 
 	time.Sleep(time.Second * 2)
