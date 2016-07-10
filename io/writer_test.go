@@ -28,6 +28,7 @@ func (s *WriterSuite) SetUpSuite(c *C) {
 }
 
 func (s *WriterSuite) TearDownSuite(c *C) {
+	os.Remove(inputName)
 	os.Remove(outputName)
 }
 
