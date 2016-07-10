@@ -1,6 +1,5 @@
 package scan
 
-
 import (
 	"testing"
 	"time"
