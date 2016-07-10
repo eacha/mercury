@@ -57,7 +57,10 @@ func (s *WriterSuite) TestWriteChannel(c *C) {
 	go writer.WriteJson()
 
 	response <- "1234"
+
+	time.Sleep(200 * time.Millisecond)
 	finish <- true
+
 	response <- "4567"
 
 	time.Sleep(time.Second * 2)
