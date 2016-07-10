@@ -2,10 +2,11 @@ package conn
 
 import (
 	"encoding/base64"
-	"sync"
 	"testing"
 
-	"github.com/eacha/aps/tools/test"
+	"time"
+
+	"github.com/eacha/mercury/lib/test"
 	. "gopkg.in/check.v1"
 )
 
@@ -15,9 +16,7 @@ type ConnTimeoutSuite struct{}
 
 var _ = Suite(&ConnTimeoutSuite{})
 
-var (
-	BUFFER = "JwAAAAo0L"
-)
+var BUFFER = "JwAAAAo0L"
 
 func (s *ConnTimeoutSuite) TestNewConnectionRefuse(c *C) {
 	conn, err := NewConnTimeout(TCP, "", 1, 10, 10)
@@ -27,102 +26,71 @@ func (s *ConnTimeoutSuite) TestNewConnectionRefuse(c *C) {
 }
 
 func (s *ConnTimeoutSuite) TestReadError(c *C) {
-	var wc sync.WaitGroup
-	port := test.RandomPort()
 	sendData, _ := base64.StdEncoding.DecodeString(BUFFER)
-
-	wc.Add(1)
-	go func() { // Client
-		defer wc.Done()
-		buffer := make([]byte, 10)
-		conn, _ := NewConnTimeout(TCP, "", port, 10, 10)
-
-		conn.Close()
-		_, err := conn.Read(buffer)
-
-		c.Assert(err, DeepEquals, &IOError{ReadMsg, ""})
-
-	}()
+	server := test.BannerServer{ToWrite: sendData, WriteWait: 0}
 
 	// Server
-	server := test.TestingBasicServer{Port: port, ToWrite: sendData, WriteWait: 0}
-	(&server).RunServer()
+	go (&server).RunServer()
+	time.Sleep(100 * time.Millisecond)
 
-	wc.Wait()
+	// Client
+	buffer := make([]byte, 10)
+	conn, _ := NewConnTimeout(TCP, "", server.Port, 10, 10)
+	conn.Close()
+
+	_, err := conn.Read(buffer)
+	c.Assert(err, DeepEquals, &IOError{ReadMsg, ""})
 }
 
 func (s *ConnTimeoutSuite) TestWriteError(c *C) {
-	var wc sync.WaitGroup
-	port := test.RandomPort()
-	banner, _ := base64.StdEncoding.DecodeString(BUFFER)
-
-	wc.Add(1)
-	go func() { // Client
-		defer wc.Done()
-		conn, _ := NewConnTimeout(TCP, "", port, 10, 10)
-
-		conn.Close()
-		_, err := conn.Write(banner)
-
-		c.Assert(err, DeepEquals, &IOError{WriteMsg, ""})
-
-	}()
+	sendData, _ := base64.StdEncoding.DecodeString(BUFFER)
+	server := test.BannerServer{ToWrite: sendData, WriteWait: 0}
 
 	// Server
-	server := test.TestingBasicServer{Port: port, ToWrite: banner, WriteWait: 0}
-	(&server).RunServer()
+	go (&server).RunServer()
+	time.Sleep(100 * time.Millisecond)
 
-	wc.Wait()
+	// Client
+	conn, _ := NewConnTimeout(TCP, "", server.Port, 10, 10)
+	conn.Close()
+
+	_, err := conn.Write(sendData)
+	c.Assert(err, DeepEquals, &IOError{WriteMsg, ""})
+
 }
 
 func (s *ConnTimeoutSuite) TestReadTimeout(c *C) {
-	var wc sync.WaitGroup
-	port := test.RandomPort()
-	banner, _ := base64.StdEncoding.DecodeString(BUFFER)
-
-	wc.Add(1)
-	go func() { // Client
-		defer wc.Done()
-		buffer := make([]byte, 10)
-		conn, _ := NewConnTimeout(TCP, "", port, 1, 1)
-
-		defer conn.Close()
-
-		_, err := conn.Read(buffer)
-
-		c.Assert(err, DeepEquals, &IOTimeoutError{ReadTimeoutMsg, ""})
-	}()
+	sendData, _ := base64.StdEncoding.DecodeString(BUFFER)
+	server := test.BannerServer{ToWrite: sendData, WriteWait: 2}
 
 	// Server
-	server := test.TestingBasicServer{Port: port, ToWrite: banner, WriteWait: 2}
-	(&server).RunServer()
+	go (&server).RunServer()
+	time.Sleep(100 * time.Millisecond)
 
-	wc.Wait()
+	// Client
+	buffer := make([]byte, 10)
+	conn, _ := NewConnTimeout(TCP, "", server.Port, 1, 1)
+	defer conn.Close()
+
+	_, err := conn.Read(buffer)
+	c.Assert(err, DeepEquals, &IOTimeoutError{ReadTimeoutMsg, ""})
 }
 
 func (s *ConnTimeoutSuite) TestReadSuccess(c *C) {
-	var wc sync.WaitGroup
-	port := test.RandomPort()
-	banner, _ := base64.StdEncoding.DecodeString(BUFFER)
-
-	wc.Add(1)
-	go func() { // Client
-		defer wc.Done()
-		buf := make([]byte, 10)
-
-		conn, _ := NewConnTimeout(TCP, "", port, 10, 10)
-		defer conn.Close()
-
-		read, _ := conn.Read(buf)
-
-		c.Assert(buf[:read], DeepEquals, banner)
-	}()
+	sendData, _ := base64.StdEncoding.DecodeString(BUFFER)
+	server := test.BannerServer{ToWrite: sendData, WriteWait: 0}
 
 	// Server
-	server := test.TestingBasicServer{Port: port, ToWrite: banner, WriteWait: 0}
-	(&server).RunServer()
+	go (&server).RunServer()
+	time.Sleep(100 * time.Millisecond)
 
-	wc.Wait()
+	// Client
+	buf := make([]byte, 10)
+	conn, _ := NewConnTimeout(TCP, "", server.Port, 10, 10)
+	defer conn.Close()
+
+	read, _ := conn.Read(buf)
+	c.Assert(buf[:read], DeepEquals, sendData)
 }
 
 // Errors
