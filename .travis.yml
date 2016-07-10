@@ -10,7 +10,6 @@ before_install:
   - go get gopkg.in/check.v1
   - go get github.com/mattn/goveralls
   - go get golang.org/x/tools/cmd/cover
-  - go get github.com/eacha/aps
 
 script:
   - ./.test-cover.sh
