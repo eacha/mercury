@@ -13,9 +13,10 @@ func Test(t *testing.T) { TestingT(t) }
 
 type ReaderSuite struct{}
 
-var _ = Suite(&ReaderSuite{})
-
-var inputName = "read.txt"
+var (
+	_         = Suite(&ReaderSuite{})
+	inputName = "read.txt"
+)
 
 func (s *ReaderSuite) SetUpSuite(c *C) {
 	file, err := os.Create(inputName)
@@ -34,15 +35,13 @@ func (s *ReaderSuite) TearDownSuite(c *C) {
 }
 
 func (s *ReaderSuite) TestNotFoundFile(c *C) {
-	queue := make(chan string, 1)
-	_, err := NewReader("error.txt", queue)
+	_, err := NewReader("error.txt", 1)
 
 	c.Assert(err.Error(), Equals, "open error.txt: no such file or directory")
 }
 
 func (s *ReaderSuite) TestNewReader(c *C) {
-	queue := make(chan string, 1)
-	reader, _ := NewReader(inputName, queue)
+	reader, _ := NewReader(inputName, 1)
 
 	c.Assert(reader.file.Name(), Equals, inputName)
 
@@ -50,16 +49,16 @@ func (s *ReaderSuite) TestNewReader(c *C) {
 }
 
 func (s *ReaderSuite) TestNewReaderPipe(c *C) {
-	queue := make(chan string, 1)
-	reader, _ := NewReader("", queue)
+	reader, _ := NewReader("", 1)
 
 	c.Assert(reader.file, Equals, os.Stdin)
 }
 
 func (s *ReaderSuite) TestReadChannel(c *C) {
-	queue := make(chan string, 1)
-	reader, _ := NewReader(inputName, queue)
+	reader, _ := NewReader(inputName, 1)
 	go reader.ReadIP()
+
+	queue := reader.GetQueue()
 
 	r, more := <-queue
 	c.Assert(r, Equals, "1234")

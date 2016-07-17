@@ -10,7 +10,7 @@ type Reader struct {
 	taskQueue chan string
 }
 
-func NewReader(fileName string, taskQueue chan string) (*Reader, error) {
+func NewReader(fileName string, bufferSize int) (*Reader, error) {
 	var (
 		rd  Reader
 		err error
@@ -25,9 +25,13 @@ func NewReader(fileName string, taskQueue chan string) (*Reader, error) {
 			return nil, err
 		}
 	}
-	rd.taskQueue = taskQueue
+	rd.taskQueue = make(chan string, bufferSize)
 
 	return &rd, nil
+}
+
+func (rd *Reader) GetQueue() chan string {
+	return rd.taskQueue
 }
 
 func (rd *Reader) ReadIP() {
