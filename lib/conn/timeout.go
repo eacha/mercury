@@ -13,30 +13,33 @@ const (
 )
 
 type ConnTimeout struct {
-	conn              net.Conn
-	Protocol          string
-	Address           string
-	Port              int
-	connectionTimeout time.Duration
-	ioTimeout         time.Duration
+	conn        net.Conn
+	Protocol    string
+	Address     string
+	Port        int
+	connTimeout time.Duration
+	ioTimeout   time.Duration
 }
 
 func NewConnTimeout(protocol, address string, port int, connectionTimeout, ioTimeout time.Duration) (*ConnTimeout, error) {
-	var c ConnTimeout
+	var (
+		c   ConnTimeout
+		err error
+	)
 
 	c.Address = address
 	c.Port = port
-	c.connectionTimeout = connectionTimeout * time.Second
+	c.connTimeout = connectionTimeout * time.Second
 	c.ioTimeout = ioTimeout * time.Second
 
-	conn, err := net.DialTimeout(protocol, c.Address+SEPARATOR+strconv.Itoa(c.Port), c.connectionTimeout)
+	c.conn, err = net.DialTimeout(protocol, c.Address+SEPARATOR+strconv.Itoa(c.Port), c.connTimeout)
 	if errTime, ok := err.(net.Error); ok && errTime.Timeout() {
 		return nil, &ConnError{ConnTimeoutMsg, c.Address}
 	} else if err != nil {
 		return nil, &ConnError{ConnRefusedMsg, c.Address}
 	}
-	c.conn = conn
 
+	// Set input-output deadline
 	if err = c.conn.SetDeadline(time.Now().Add(c.ioTimeout)); err != nil {
 		c.conn.Close()
 		return nil, &IOTimeoutError{SetTimeoutMsg, c.Address}
@@ -54,6 +57,7 @@ func (c *ConnTimeout) Read(b []byte) (int, error) {
 		return 0, &IOError{ReadMsg, c.Address}
 	}
 
+	// Set input-output deadline
 	if err = c.conn.SetDeadline(time.Now().Add(c.ioTimeout)); err != nil {
 		return 0, &IOTimeoutError{SetTimeoutMsg, c.Address}
 	}
@@ -70,6 +74,7 @@ func (c *ConnTimeout) Write(b []byte) (int, error) {
 		return 0, &IOError{WriteMsg, c.Address}
 	}
 
+	// Set input-output deadline
 	if err = c.conn.SetDeadline(time.Now().Add(c.ioTimeout)); err != nil {
 		return 0, &IOTimeoutError{SetTimeoutMsg, c.Address}
 	}
