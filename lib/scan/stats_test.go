@@ -9,9 +9,9 @@ import (
 
 func Test(t *testing.T) { TestingT(t) }
 
-type ThreadSuite struct{}
+type StatsSuite struct{}
 
-var _ = Suite(&ThreadSuite{})
+var _ = Suite(&StatsSuite{})
 
 func simpleThread(threadId, readLines, sleepTime int, c chan Statistic) {
 	ts := NewStatistic(threadId)
@@ -27,7 +27,7 @@ func simpleThread(threadId, readLines, sleepTime int, c chan Statistic) {
 
 }
 
-func (s *ThreadSuite) TestSimple(c *C) {
+func (s *StatsSuite) TestSimple(c *C) {
 	channel := make(chan Statistic)
 
 	go simpleThread(1, 1, 100, channel)
@@ -37,7 +37,7 @@ func (s *ThreadSuite) TestSimple(c *C) {
 	c.Assert(ts.ProcessedLines, Equals, 1)
 }
 
-func (s *ThreadSuite) TestMultiRead(c *C) {
+func (s *StatsSuite) TestMultiRead(c *C) {
 	channel := make(chan Statistic)
 
 	go simpleThread(1, 10, 100, channel)
@@ -49,7 +49,7 @@ func (s *ThreadSuite) TestMultiRead(c *C) {
 	c.Assert(1010 >= ts.DeltaTime, Equals, true)
 }
 
-func (s *ThreadSuite) TestMultiThreads(c *C) {
+func (s *StatsSuite) TestMultiThreads(c *C) {
 	channel := make(chan Statistic)
 
 	go simpleThread(1, 5, 100, channel)
