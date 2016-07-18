@@ -27,7 +27,7 @@ func (bc *bannerConn) ReadBanner() (string, error) {
 
 	_, err := bc.conn.Read(buffer)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	return string(buffer), nil
