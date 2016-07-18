@@ -1,8 +1,8 @@
 package banner
 
-import "github.com/eacha/mercury/lib/scan"
-
 type BannerData struct {
-	scan.Data
-	Banner string `json:"banner,omitempty"`
+	IP        string `json:"ip,omitempty"`
+	Timestamp string `json:"timestamp,omitempty"`
+	Error     string `json:"error,omitempty"`
+	Banner    string `json:"banner,omitempty"`
 }
