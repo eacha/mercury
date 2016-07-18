@@ -1,8 +1,9 @@
 package banner
 
 import (
-	"github.com/eacha/aps/tools/conn"
 	"time"
+
+	"github.com/eacha/mercury/lib/conn"
 )
 
 const bufferSize = 1024
