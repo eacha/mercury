@@ -2,18 +2,18 @@ package io
 
 import (
 	"os"
-	"time"
 )
 
-const WAITING_TIMEOUT = 1
+const (
+	FINISH_WRITE = "\\0"
+)
 
 type Writer struct {
 	file          *os.File
 	responseQueue chan string
-	finish        chan bool
 }
 
-func NewWriter(fileName string, responseQueue chan string, finish chan bool) (*Writer, error) {
+func NewWriter(fileName string, bufferSize int) (*Writer, error) {
 	var (
 		wr  Writer
 		err error
@@ -28,10 +28,13 @@ func NewWriter(fileName string, responseQueue chan string, finish chan bool) (*W
 			return nil, err
 		}
 	}
-	wr.responseQueue = responseQueue
-	wr.finish = finish
+	wr.responseQueue = make(chan string, bufferSize)
 
 	return &wr, nil
+}
+
+func (wr *Writer) GetQueue() chan string {
+	return wr.responseQueue
 }
 
 func (wr *Writer) WriteJson() {
@@ -40,18 +43,10 @@ func (wr *Writer) WriteJson() {
 	}
 
 	for {
-		select {
-		case line := <-wr.responseQueue:
+		if line := <-wr.responseQueue; line != FINISH_WRITE {
 			wr.file.WriteString(line + "\n")
-		case <-wr.finish:
-			for {
-				select {
-				case line := <-wr.responseQueue:
-					wr.file.WriteString(line + "\n")
-				case <-time.After(time.Second * WAITING_TIMEOUT):
-					return
-				}
-			}
+		} else {
+			return
 		}
 	}
 }

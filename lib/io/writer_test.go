@@ -33,9 +33,7 @@ func (s *WriterSuite) TearDownSuite(c *C) {
 }
 
 func (s *WriterSuite) TestNewWriter(c *C) {
-	response := make(chan string, 1)
-	finish := make(chan bool, 1)
-	writer, _ := NewWriter(outputName, response, finish)
+	writer, _ := NewWriter(outputName, 1)
 
 	c.Assert(writer.file.Name(), Equals, outputName)
 
@@ -43,54 +41,22 @@ func (s *WriterSuite) TestNewWriter(c *C) {
 }
 
 func (s *WriterSuite) TestNewWriterPipe(c *C) {
-	response := make(chan string, 1)
-	finish := make(chan bool, 1)
-	writer, _ := NewWriter("", response, finish)
+	writer, _ := NewWriter("", 1)
 
 	c.Assert(writer.file, Equals, os.Stdout)
 }
 
 func (s *WriterSuite) TestWriteChannel(c *C) {
-	response := make(chan string, 1)
-	finish := make(chan bool, 1)
-	writer, _ := NewWriter(outputName, response, finish)
+	writer, _ := NewWriter(outputName, 1)
 	go writer.WriteJson()
 
-	response <- "1234"
+	response := writer.GetQueue()
 
-	time.Sleep(500 * time.Millisecond)
-	finish <- true
-
-	response <- "4567"
-
-	time.Sleep(time.Second * 2)
-
-	file, err := os.Open(outputName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	reader := bufio.NewReader(file)
-
-	line, _, err := reader.ReadLine()
-	c.Assert(string(line), Equals, "1234")
-
-	line, _, err = reader.ReadLine()
-	c.Assert(string(line), Equals, "4567")
-}
-
-func (s *WriterSuite) TestWriteLastData(c *C) {
-	response := make(chan string, 1)
-	finish := make(chan bool, 1)
-	writer, _ := NewWriter(outputName, response, finish)
-	go writer.WriteJson()
-
-	finish <- true
 	response <- "1234"
 	response <- "4567"
+	response <- FINISH_WRITE
 
-	time.Sleep(time.Second * 2)
+	time.Sleep(time.Second * 1)
 
 	file, err := os.Open(outputName)
 	if err != nil {
