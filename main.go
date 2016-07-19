@@ -10,6 +10,7 @@ import (
 
 	"encoding/json"
 
+	"github.com/eacha/mercury/lib"
 	"github.com/eacha/mercury/lib/conn"
 	"github.com/eacha/mercury/lib/scan"
 	"github.com/eacha/mercury/lib/scan/io"
@@ -60,13 +61,13 @@ func init() {
 		log.Fatal("--port must be in the range [0, 65535]")
 	}
 
-	//if options.Module == "" || !StringInSlice(options.Module, modulesList) {
-	//	log.Fatal("--module must be in the --module-list")
-	//}
-	//
-	//if !StringInSlice(options.Protocol, protocolList) {
-	//	log.Fatal("--protocol must be in the --protocol-list")
-	//}
+	if options.Module == "" || !lib.StringInSlice(options.Module, modulesList) {
+		log.Fatal("--module must be in the --module-list")
+	}
+
+	if !lib.StringInSlice(options.Protocol, protocolList) {
+		log.Fatal("--protocol must be in the --protocol-list")
+	}
 
 	if connectionTimeout <= 0 && ioTimeout <= 0 {
 		log.Fatal("--connection-timeout and  --io-timeout must be positive")
