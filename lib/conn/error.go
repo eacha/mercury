@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-var (
+const (
 	ConnRefusedMsg  = "Connection refued by host"
 	ConnTimeoutMsg  = "Connection timeout"
 	SetTimeoutMsg   = "Can't set IO timeout"
@@ -15,28 +15,28 @@ var (
 )
 
 type ConnError struct {
-	msg     string
-	address string
+	Msg     string
+	Address string
 }
 
 func (e *ConnError) Error() string {
-	return fmt.Sprintf("%s, Host: %s", e.msg, e.address)
+	return fmt.Sprintf("%s, Host: %s", e.Msg, e.Address)
 }
 
 type IOError struct {
-	msg     string
-	address string
+	Msg     string
+	Address string
 }
 
 func (e *IOError) Error() string {
-	return fmt.Sprintf("%s, Host: %s", e.msg, e.address)
+	return fmt.Sprintf("%s, Host: %s", e.Msg, e.Address)
 }
 
 type IOTimeoutError struct {
-	msg     string
-	address string
+	Msg     string
+	Address string
 }
 
 func (e *IOTimeoutError) Error() string {
-	return fmt.Sprintf("%s, Host: %s", e.msg, e.address)
+	return fmt.Sprintf("%s, Host: %s", e.Msg, e.Address)
 }
