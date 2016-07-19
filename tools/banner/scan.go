@@ -5,7 +5,7 @@ import (
 	"github.com/eacha/mercury/lib/scan"
 )
 
-func HostScan(options *scan.Options, address string) BannerData {
+func HostScan(options *scan.Options, address string) scan.Data {
 	data := &BannerData{IP: address}
 
 	conn, err := conn.NewConnTimeout(options.Protocol, address, options.Port, options.ConnectionTimeout, options.IOTimeout)
