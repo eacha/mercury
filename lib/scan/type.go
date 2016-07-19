@@ -27,4 +27,4 @@ type Options struct {
 	// More options in the future
 }
 
-type scannable func(*Options, string) *Data
+type scannable func(*Options, string) Data

@@ -12,7 +12,7 @@ func Scan(options *Options, statistic *Statistic, fn scannable) {
 		statistic.IncreaseProcessedLines()
 
 		data := fn(options, address)
-		j, _ := json.Marshal(*data)
+		j, _ := json.Marshal(data)
 
 		options.OutputChan <- string(j)
 	}
