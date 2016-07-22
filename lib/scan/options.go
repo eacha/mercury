@@ -13,7 +13,7 @@ type Options struct {
 	OutputFileName string
 
 	InputChan  chan string
-	OutputChan chan string
+	OutputChan chan Data
 
 	Port              int
 	Module            string
