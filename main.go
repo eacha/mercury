@@ -13,7 +13,6 @@ import (
 	"github.com/eacha/mercury/lib"
 	"github.com/eacha/mercury/lib/conn"
 	"github.com/eacha/mercury/lib/scan"
-	"github.com/eacha/mercury/lib/scan/io"
 	"github.com/eacha/mercury/tools/banner"
 )
 
@@ -99,12 +98,12 @@ func main() {
 		ts = make([]*scan.Statistic, int(options.Threads))
 	)
 
-	reader, err := io.NewReader(options.InputFileName, inputChannelBuffer)
+	reader, err := scan.NewReader(options.InputFileName, inputChannelBuffer)
 	if err != nil {
 		log.Fatal("Can't open the input file")
 	}
 
-	writer, err := io.NewWriter(options.OutputFileName, outputChannelBuffer)
+	writer, err := scan.NewWriter(options.OutputFileName, outputChannelBuffer)
 	if err != nil {
 		log.Fatal("Can't open the output file")
 	}
@@ -126,7 +125,7 @@ func main() {
 	}
 
 	wg.Wait()
-	options.OutputChan <- io.FINISH_WRITE
+	options.OutputChan <- scan.FinishWrite
 	time.Sleep(10 * time.Second)
 
 	for _, value := range ts {

@@ -1,13 +1,10 @@
 package scan
 
 import (
-	"testing"
 	"time"
 
 	. "gopkg.in/check.v1"
 )
-
-func Test(t *testing.T) { TestingT(t) }
 
 type StatsSuite struct{}
 
@@ -24,7 +21,6 @@ func simpleThread(threadId, readLines, sleepTime int, c chan Statistic) {
 
 	ts.SetEndTime()
 	c <- *ts
-
 }
 
 func (s *StatsSuite) TestSimple(c *C) {
