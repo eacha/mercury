@@ -27,7 +27,7 @@ func (s *scanSuite) TestScan(c *C) {
 		wg      sync.WaitGroup
 		options = Options{
 			InputChan:         make(chan string, 1),
-			OutputChan:        make(chan string, 1),
+			OutputChan:        make(chan Data, 1),
 			Protocol:          conn.TCP,
 			ConnectionTimeout: 1,
 			IOTimeout:         1,
